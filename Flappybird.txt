@@ -1,0 +1,180 @@
+Dưới đây là hướng dẫn chi tiết để tạo một game Flappy Bird đơn giản bằng Godot 4.x, với mục tiêu xuất ra file APK để chạy trên thiết bị di động (Android). Hướng dẫn này tập trung vào các bước cơ bản, sử dụng 20% kiến thức cốt lõi để đạt 80% kết quả, phù hợp cho người mới bắt đầu. Game sẽ bao gồm: nhân vật bay, chướng ngại vật (ống), điểm số, và xuất APK.
+Hướng Dẫn Tạo Game Flappy Bird Trong Godot
+1. Chuẩn Bị
+Cài đặt Godot: Tải Godot 4.x từ godotengine.org. Chọn bản Standard hoặc Mono (nếu muốn dùng C#).
+Tài nguyên:
+Tải hình ảnh miễn phí từ OpenGameArt (nhân vật, ống, nền) hoặc dùng sprite đơn giản (như hình vuông/tam giác tạm thời).
+Ví dụ: Tìm "Flappy Bird sprite" hoặc tạo hình PNG cơ bản trong Paint.
+Cấu hình Android (cho xuất APK):
+Cài Android SDK (tải qua Android Studio hoặc riêng lẻ).
+Cài Java JDK (phiên bản 17 trở lên).
+Trong Godot: Vào Editor > Editor Settings > Export > Android, cấu hình đường dẫn đến Android SDK.
+2. Thiết Lập Dự Án
+Mở Godot, tạo dự án mới (FlappyBird).
+Cấu hình cửa sổ game:
+Vào Project > Project Settings > Display > Window:
+Đặt Size/Viewport Width: 360, Height: 640 (phù hợp cho mobile).
+Stretch Mode: Canvas Items, Aspect: Keep (để tương thích các màn hình).
+Lưu dự án và tạo thư mục: res://Sprites (để chứa hình ảnh) và res://Scenes.
+3. Tạo Scene Nhân Vật (Player)
+Tạo Scene:
+Vào Scene > New Scene, chọn CharacterBody2D làm node gốc, đặt tên là Player.
+Thêm các node con:
+Sprite2D: Gắn hình ảnh nhân vật (PNG, ví dụ: con chim).
+CollisionShape2D: Thêm hình dạng va chạm (chọn RectangleShape2D hoặc CircleShape2D, điều chỉnh kích thước khớp với sprite).
+Viết mã GDScript:
+Nhấn chuột phải vào node Player, chọn Attach Script, lưu ở res://Scripts/Player.gd.
+Dùng mã sau để điều khiển chim bay và nhảy:
+extends CharacterBody2D
+
+var gravity = 900.0
+var jump_speed = -300.0
+var velocity = Vector2.ZERO
+var is_game_over = false
+
+func _physics_process(delta):
+    if not is_game_over:
+        # Áp dụng trọng lực
+        velocity.y += gravity * delta
+
+        # Nhảy khi chạm màn hình (mobile) hoặc nhấn phím cách
+        if Input.is_action_just_pressed("jump"):
+            velocity.y = jump_speed
+
+        # Di chuyển
+        velocity = move_and_slide(velocity, Vector2.UP)
+
+        # Giới hạn góc xoay cho hiệu ứng bay
+        rotation = clamp(velocity.y / 500.0, -0.5, 0.5)
+Cấu hình Input:
+Vào Project > Project Settings > Input Map:
+Thêm hành động jump, gán phím Space và Touch (cho mobile).
+Lưu scene vào res://Scenes/Player.tscn.
+4. Tạo Scene Ống (Pipe)
+Tạo Scene:
+Tạo scene mới, chọn Node2D làm gốc, đặt tên Pipe.
+Thêm các node con:
+Sprite2D (ống trên): Gắn hình ống (PNG), đặt Position Y cao hơn.
+Sprite2D (ống dưới): Gắn hình ống, lật ngược (Scale Y: -1), đặt Position Y thấp hơn.
+Area2D (cho va chạm):
+Thêm CollisionShape2D, dùng RectangleShape2D bao quanh ống trên và dưới.
+Area2D (cho điểm số):
+Thêm CollisionShape2D, đặt giữa khe hở của hai ống.
+Viết mã GDScript:
+Gắn script cho node Pipe:
+extends Node2D
+
+var speed = -150.0  # Tốc độ ống di chuyển sang trái
+
+func _process(delta):
+    position.x += speed * delta
+
+    # Xóa ống khi ra khỏi màn hình
+    if position.x < -500:
+        queue_free()
+Gắn script cho Area2D (điểm số):
+signal score
+func _on_body_entered(body):
+    if body.name == "Player":
+        emit_signal("score")
+Gắn script cho Area2D (va chạm):
+func _on_body_entered(body):
+    if body.name == "Player":
+        body.is_game_over = true
+        get_tree().paused = true  # Dừng game khi va chạm
+Lưu scene vào res://Scenes/Pipe.tscn.
+5. Tạo Scene Chính (Main)
+Tạo Scene:
+Tạo scene mới, chọn Node2D làm gốc, đặt tên Main.
+Thêm các node con:
+Player: Kéo scene Player.tscn vào.
+Camera2D: Kéo vào node Player, bật Current để camera theo nhân vật.
+Sprite2D (nền): Gắn hình nền, đặt Position ở giữa (180, 320).
+Timer (tạo ống định kỳ): Đặt Wait Time: 2.0s, bật Autostart.
+CanvasLayer (UI):
+Thêm Label (hiển thị điểm số), đặt Text: 0, Position: (20, 20).
+Viết mã GDScript:
+Gắn script cho node Main:
+extends Node2D
+
+var pipe_scene = preload("res://Scenes/Pipe.tscn")
+var score = 0
+
+func _ready():
+    $Player.position = Vector2(100, 320)  # Đặt vị trí ban đầu của chim
+    $CanvasLayer/Label.text = str(score)
+
+func _on_timer_timeout():
+    var pipe = pipe_scene.instantiate()
+    pipe.position = Vector2(400, randf_range(150, 500))  # Vị trí ngẫu nhiên
+    pipe.connect("score", _on_pipe_score)
+    add_child(pipe)
+
+func _on_pipe_score():
+    score += 1
+    $CanvasLayer/Label.text = str(score)
+Lưu scene vào res://Scenes/Main.tscn.
+6. Thêm Game Over và Restart
+Thêm nút Restart:
+Trong CanvasLayer, thêm Button, đặt Text: Restart, Position: (180, 320) (giữa màn hình).
+Gắn script cho Button:
+func _on_pressed():
+    get_tree().paused = false
+    get_tree().reload_current_scene()
+Hiển thị Game Over:
+Thêm Label trong CanvasLayer, đặt Text: Game Over, Position: (180, 200), bật Visible: Off.
+Trong script Main, thêm:
+func _process(delta):
+    if $Player.is_game_over:
+        $CanvasLayer/GameOverLabel.visible = true
+        $CanvasLayer/RestartButton.visible = true
+7. Xuất APK Cho Android
+Cấu hình Export:
+Vào Project > Export:
+Thêm preset Android.
+Đặt Export Path (ví dụ: FlappyBird.apk).
+Trong Keystore, tạo debug keystore:
+Chạy lệnh trong terminal:
+keytool -keyalg RSA -genkeypair -alias androiddebugkey -keypass android -keystore debug.keystore -storepass android -dname "CN=Android Debug,O=Android,C=US" -validity 9999
+Cấu hình đường dẫn đến debug.keystore trong Godot.
+Cài đặt Android SDK:
+Tải Android Studio, cài SDK (hoặc chỉ tải Command Line Tools).
+Trong Godot, vào Editor Settings > Export > Android, đặt đường dẫn đến adb, jarsigner, và debug.keystore.
+Xuất APK:
+Trong Project > Export, chọn preset Android, nhấn Export Project.
+Chuyển file APK sang điện thoại, cài đặt (bật Install from Unknown Sources).
+Kiểm tra:
+Chạy game trên điện thoại, đảm bảo chạm màn hình để nhảy hoạt động.
+8. Tối Ưu Cho Mobile
+Điều khiển cảm ứng: Input jump đã hỗ trợ chạm màn hình (qua Input Map).
+Tỷ lệ màn hình: Đảm bảo Stretch Mode và Aspect đã cấu hình đúng.
+Hiệu suất:
+Giới hạn số lượng ống (xóa khi ra khỏi màn hình).
+Dùng hình ảnh kích thước nhỏ (PNG 32x32 hoặc 64x64).
+9. Thêm Tính Năng (Tùy Chọn)
+Âm thanh:
+Thêm AudioStreamPlayer vào Main, gắn file MP3/WAV (tìm ở freesound.org).
+Phát âm thanh khi nhảy hoặc va chạm:
+func _process(delta):
+    if Input.is_action_just_pressed("jump"):
+        $AudioStreamPlayer.play()
+Hiệu ứng:
+Thêm AnimationPlayer cho nhân vật, tạo hoạt ảnh vỗ cánh.
+Thêm Particle2D cho hiệu ứng khi va chạm.
+10. Tài Nguyên và Debug
+Tài nguyên miễn phí:
+Sprite: OpenGameArt.
+Âm thanh: Freesound.
+Debug:
+Dùng print() để kiểm tra giá trị (ví dụ: print(velocity)).
+Kiểm tra lỗi trong tab Output.
+Cộng đồng: Tham gia Godot Forum hoặc r/godot để hỏi thêm.
+Tóm Tắt
+Scene: Player (CharacterBody2D), Pipe (Node2D), Main (Node2D).
+Cơ chế: Nhảy (chạm/phím cách), ống di chuyển, điểm số, game over, restart.
+Xuất APK: Cấu hình Android SDK, debug keystore, xuất file.
+Thời gian: 3-5 giờ cho người mới (bao gồm tìm tài nguyên).
+Với hướng dẫn này, bạn có thể tạo một game Flappy Bird cơ bản chạy trên Android. Nếu bạn cần:
+Code chi tiết hơn cho một phần cụ thể?
+Hỗ trợ tìm sprite/âm thanh?
+Hướng dẫn cấu hình Android SDK chi tiết? Hãy cho tôi biết!

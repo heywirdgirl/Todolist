@@ -1,0 +1,68 @@
+Để lấy API key (hoặc Private Token) của Printful, bạn cần làm theo các bước sau đây. Quy trình này được thực hiện thông qua Printful Developer Portal và áp dụng cho việc tích hợp API để tự động hóa quy trình kinh doanh, như quản lý đơn hàng, sản phẩm, hoặc tạo mockup. Dưới đây là hướng dẫn chi tiết:
+Hướng dẫn lấy API Private Token của Printful
+Đăng nhập vào tài khoản Printful:
+Truy cập trang web Printful: www.printful.com.
+Đăng nhập vào tài khoản Printful của bạn. Nếu chưa có tài khoản, đăng ký tại đây bằng cách cung cấp email, mật khẩu, và các thông tin cần thiết.
+Truy cập Printful Developer Portal:
+Mở trình duyệt và truy cập vào developers.printful.com.
+Đăng nhập bằng thông tin tài khoản Printful của bạn. Nếu bạn đã đăng nhập vào Printful, hệ thống có thể tự động nhận diện.
+Tạo Private Token:
+Trong Developer Portal, tìm mục Tokens (thường nằm trong menu hoặc trang quản lý).
+Nhấp vào nút + Add new token (Tạo token mới).
+Điền các thông tin sau:
+Tên token: Đặt một tên dễ nhận biết (ví dụ: "My Store API" hoặc "Teespring Integration").
+Email liên hệ: Cung cấp email để nhận thông báo hoặc hỗ trợ từ Printful.
+Ngày hết hạn: Chọn ngày hết hạn cho token (tối đa 2 năm, khuyến nghị chọn ngày xa nhất để tránh phải tạo lại thường xuyên).
+Access Level: Chọn mức truy cập:
+Store: Chỉ truy cập một cửa hàng cụ thể (chọn cửa hàng từ danh sách nếu bạn có nhiều cửa hàng).
+Account (all stores): Truy cập tất cả các cửa hàng liên kết với tài khoản của bạn.
+Scopes: Chọn các quyền truy cập (scopes) cần thiết cho API, ví dụ:
+Orders: Quản lý đơn hàng.
+Products: Quản lý sản phẩm.
+Embedded Designer: Tích hợp công cụ thiết kế.
+Khuyến nghị chọn tất cả scopes để đảm bảo linh hoạt, nhưng bạn có thể giới hạn tùy theo nhu cầu.
+Domains (nếu cần): Nhập tên miền của website để đảm bảo token chỉ hoạt động với tên miền của bạn (tăng bảo mật).
+Nếu bạn sử dụng Embedded Design Maker, hãy đảm bảo tích vào ô "Embedded Designer" trong phần Extensions để token hỗ trợ tính năng này.
+Tạo và lưu token:
+Sau khi điền đầy đủ thông tin, nhấp vào Create hoặc Submit.
+Hệ thống sẽ tạo một Access Token (chuỗi ký tự dài). Lưu ý: Token này chỉ hiển thị một lần, vì vậy hãy sao chép và lưu trữ ngay lập tức ở nơi an toàn (ví dụ: trong tệp văn bản hoặc trình quản lý mật khẩu).
+Nếu bạn mất token, bạn sẽ cần tạo lại token mới.
+Kết nối token với ứng dụng hoặc nền tảng:
+Nếu bạn đang tích hợp với một nền tảng bên thứ ba (như Teeinblue, Shopify, hoặc ứng dụng tùy chỉnh), dán token vào phần cài đặt API của nền tảng đó.
+Ví dụ, với Teeinblue:
+Vào Fulfillment Providers trong Teeinblue.
+Chọn Printful, dán token vào ô API Key.
+Chọn cửa hàng (nếu có nhiều cửa hàng) và nhấn Save.
+Kiểm tra kết nối:
+Sau khi thêm token vào ứng dụng hoặc nền tảng, thực hiện một yêu cầu thử nghiệm (test request) để đảm bảo token hoạt động đúng. Ví dụ, bạn có thể thử lấy danh sách sản phẩm qua API endpoint https://api.printful.com/store/products.
+Lưu ý quan trọng
+Bảo mật token: Không chia sẻ token công khai (ví dụ: trên GitHub hoặc diễn đàn). Nếu token bị lộ, hãy xóa và tạo token mới trong Developer Portal.
+Hạn chế API: Printful giới hạn 120 yêu cầu mỗi phút. Một số endpoint như mockup generator có giới hạn thấp hơn. Hãy kiểm tra X-Ratelimit-* headers để quản lý số lượng yêu cầu.
+API v2 (Beta): Printful hiện hỗ trợ API v2 với các tính năng mới như tạo đơn hàng linh hoạt hơn và cải tiến hiệu suất. Sử dụng endpoint với tiền tố /v2 (ví dụ: https://api.printful.com/v2/orders).
+Hết hạn token: Token có thời hạn (tối đa 2 năm). Đặt lời nhắc để gia hạn hoặc tạo token mới trước khi hết hạn.
+Hỗ trợ: Nếu gặp vấn đề, liên hệ đội ngũ hỗ trợ của Printful qua email devsupport@printful.com.
+Lưu ý tại Việt Nam: Đảm bảo tài khoản Printful của bạn đã liên kết với phương thức thanh toán hợp lệ (như PayPal hoặc thẻ tín dụng) để xử lý đơn hàng. Nếu bạn gặp khó khăn với PayPal tại Việt Nam, hãy kiểm tra các phương thức thanh toán thay thế trong Printful.
+Ví dụ sử dụng API (dành cho lập trình viên)
+Nếu bạn là lập trình viên, dưới đây là ví dụ cơ bản để gọi API Printful bằng Python:
+import requests
+
+# Thay YOUR_API_TOKEN bằng token bạn vừa lấy
+api_token = "YOUR_API_TOKEN"
+headers = {
+    "Authorization": f"Bearer {api_token}",
+    "Content-Type": "application/json"
+}
+
+# Gọi API để lấy danh sách sản phẩm
+response = requests.get("https://api.printful.com/store/products", headers=headers)
+
+# Kiểm tra phản hồi
+if response.status_code == 200:
+    print(response.json())
+else:
+    print(f"Error: {response.json()}")
+Lưu ý thêm
+API Key cũ: Từ ngày 30/09/2022, Printful không cho phép tạo API Key mới, và từ 30/03/2023, các API Key cũ đã ngừng hoạt động. Bạn bắt buộc phải sử dụng Private Token như hướng dẫn trên.
+Tích hợp với Shopify: Nếu bạn dùng Shopify, bạn có thể cài đặt ứng dụng Printful trực tiếp từ Shopify App Store để kết nối mà không cần API thủ công. Sau khi cài đặt, token có thể được tạo tự động khi kết nối.
+Tài liệu tham khảo: Xem chi tiết tại Printful API Documentation để biết thêm về các endpoint, scopes, và cách sử dụng API.
+Nếu bạn cần hướng dẫn cụ thể hơn (ví dụ: tích hợp với nền tảng cụ thể như Teeinblue, Shopify, hoặc cách xử lý lỗi), hãy cho tôi biết!
